@@ -1,0 +1,106 @@
+Name:               prometheus-prometheus-prometheus-oper-prometheus
+Namespace:          default
+CreationTimestamp:  Fri, 23 Jul 2021 13:13:54 +0300
+Selector:           app=prometheus,prometheus=prometheus-prometheus-oper-prometheus
+Labels:             app=prometheus-operator-prometheus
+                    app.kubernetes.io/managed-by=Helm
+                    chart=prometheus-operator-9.3.2
+                    heritage=Helm
+                    release=prometheus
+Annotations:        meta.helm.sh/release-name: prometheus
+                    meta.helm.sh/release-namespace: default
+                    prometheus-operator-input-hash: 542619002784662331
+Replicas:           1 desired | 1 total
+Update Strategy:    RollingUpdate
+Pods Status:        1 Running / 0 Waiting / 0 Succeeded / 0 Failed
+Pod Template:
+  Labels:           app=prometheus
+                    prometheus=prometheus-prometheus-oper-prometheus
+  Service Account:  prometheus-prometheus-oper-prometheus
+  Containers:
+   prometheus:
+    Image:      quay.io/prometheus/prometheus:v2.18.2
+    Port:       9090/TCP
+    Host Port:  0/TCP
+    Args:
+      --web.console.templates=/etc/prometheus/consoles
+      --web.console.libraries=/etc/prometheus/console_libraries
+      --config.file=/etc/prometheus/config_out/prometheus.env.yaml
+      --storage.tsdb.path=/prometheus
+      --storage.tsdb.retention.time=10d
+      --web.enable-lifecycle
+      --storage.tsdb.no-lockfile
+      --web.external-url=http://prometheus-prometheus-oper-prometheus.default:9090
+      --web.route-prefix=/
+    Liveness:     http-get http://:web/-/healthy delay=0s timeout=3s period=5s #success=1 #failure=6
+    Readiness:    http-get http://:web/-/ready delay=0s timeout=3s period=5s #success=1 #failure=120
+    Environment:  <none>
+    Mounts:
+      /etc/prometheus/certs from tls-assets (ro)
+      /etc/prometheus/config_out from config-out (ro)
+      /etc/prometheus/rules/prometheus-prometheus-prometheus-oper-prometheus-rulefiles-0 from prometheus-prometheus-prometheus-oper-prometheus-rulefiles-0 (rw)
+      /prometheus from prometheus-prometheus-prometheus-oper-prometheus-db (rw)
+   prometheus-config-reloader:
+    Image:      quay.io/coreos/prometheus-config-reloader:v0.38.1
+    Port:       <none>
+    Host Port:  <none>
+    Command:
+      /bin/prometheus-config-reloader
+    Args:
+      --log-format=logfmt
+      --reload-url=http://127.0.0.1:9090/-/reload
+      --config-file=/etc/prometheus/config/prometheus.yaml.gz
+      --config-envsubst-file=/etc/prometheus/config_out/prometheus.env.yaml
+    Limits:
+      cpu:     100m
+      memory:  25Mi
+    Requests:
+      cpu:     100m
+      memory:  25Mi
+    Environment:
+      POD_NAME:   (v1:metadata.name)
+    Mounts:
+      /etc/prometheus/config from config (rw)
+      /etc/prometheus/config_out from config-out (rw)
+   rules-configmap-reloader:
+    Image:      docker.io/jimmidyson/configmap-reload:v0.3.0
+    Port:       <none>
+    Host Port:  <none>
+    Args:
+      --webhook-url=http://127.0.0.1:9090/-/reload
+      --volume-dir=/etc/prometheus/rules/prometheus-prometheus-prometheus-oper-prometheus-rulefiles-0
+    Limits:
+      cpu:     100m
+      memory:  25Mi
+    Requests:
+      cpu:        100m
+      memory:     25Mi
+    Environment:  <none>
+    Mounts:
+      /etc/prometheus/rules/prometheus-prometheus-prometheus-oper-prometheus-rulefiles-0 from prometheus-prometheus-prometheus-oper-prometheus-rulefiles-0 (rw)
+  Volumes:
+   config:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  prometheus-prometheus-prometheus-oper-prometheus
+    Optional:    false
+   tls-assets:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  prometheus-prometheus-prometheus-oper-prometheus-tls-assets
+    Optional:    false
+   config-out:
+    Type:       EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:     
+    SizeLimit:  <unset>
+   prometheus-prometheus-prometheus-oper-prometheus-rulefiles-0:
+    Type:      ConfigMap (a volume populated by a ConfigMap)
+    Name:      prometheus-prometheus-prometheus-oper-prometheus-rulefiles-0
+    Optional:  false
+   prometheus-prometheus-prometheus-oper-prometheus-db:
+    Type:       EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:     
+    SizeLimit:  <unset>
+Volume Claims:  <none>
+Events:
+  Type    Reason            Age   From                    Message
+  ----    ------            ----  ----                    -------
+  Normal  SuccessfulCreate  7m3s  statefulset-controller  create Pod prometheus-prometheus-prometheus-oper-prometheus-0 in StatefulSet prometheus-prometheus-prometheus-oper-prometheus successful

@@ -1,0 +1,68 @@
+Name:                   prometheus-prometheus-oper-operator
+Namespace:              default
+CreationTimestamp:      Fri, 23 Jul 2021 13:13:29 +0300
+Labels:                 app=prometheus-operator-operator
+                        app.kubernetes.io/managed-by=Helm
+                        chart=prometheus-operator-9.3.2
+                        heritage=Helm
+                        release=prometheus
+Annotations:            deployment.kubernetes.io/revision: 1
+                        meta.helm.sh/release-name: prometheus
+                        meta.helm.sh/release-namespace: default
+Selector:               app=prometheus-operator-operator,release=prometheus
+Replicas:               1 desired | 1 updated | 1 total | 1 available | 0 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        0
+RollingUpdateStrategy:  25% max unavailable, 25% max surge
+Pod Template:
+  Labels:           app=prometheus-operator-operator
+                    chart=prometheus-operator-9.3.2
+                    heritage=Helm
+                    release=prometheus
+  Service Account:  prometheus-prometheus-oper-operator
+  Containers:
+   prometheus-operator:
+    Image:      quay.io/coreos/prometheus-operator:v0.38.1
+    Port:       8080/TCP
+    Host Port:  0/TCP
+    Args:
+      --manage-crds=true
+      --kubelet-service=kube-system/prometheus-prometheus-oper-kubelet
+      --logtostderr=true
+      --localhost=127.0.0.1
+      --prometheus-config-reloader=quay.io/coreos/prometheus-config-reloader:v0.38.1
+      --config-reloader-image=docker.io/jimmidyson/configmap-reload:v0.3.0
+      --config-reloader-cpu=100m
+      --config-reloader-memory=25Mi
+    Environment:  <none>
+    Mounts:       <none>
+   tls-proxy:
+    Image:      squareup/ghostunnel:v1.5.2
+    Port:       8443/TCP
+    Host Port:  0/TCP
+    Args:
+      server
+      --listen=:8443
+      --target=127.0.0.1:8080
+      --key=cert/key
+      --cert=cert/cert
+      --disable-authentication
+    Environment:  <none>
+    Mounts:
+      /cert from tls-proxy-secret (ro)
+  Volumes:
+   tls-proxy-secret:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  prometheus-prometheus-oper-admission
+    Optional:    false
+Conditions:
+  Type           Status  Reason
+  ----           ------  ------
+  Available      True    MinimumReplicasAvailable
+  Progressing    True    NewReplicaSetAvailable
+OldReplicaSets:  <none>
+NewReplicaSet:   prometheus-prometheus-oper-operator-6d9c4bdb9f (1/1 replicas created)
+Events:
+  Type    Reason             Age    From                   Message
+  ----    ------             ----   ----                   -------
+  Normal  ScalingReplicaSet  8m38s  deployment-controller  Scaled up replica set prometheus-prometheus-oper-operator-6d9c4bdb9f to 1
